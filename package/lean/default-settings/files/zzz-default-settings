@@ -20,44 +20,63 @@ rm -f /usr/lib/lua/luci/view/admin_status/index/minidlna.htm
 rm -f /www/luci-static/resources/view/status/include/70_ddns.js
 rm -f /www/luci-static/resources/view/status/include/80_upnp.js
 
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/aria2.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/aria2.lua
 sed -i 's/services/nas/g' /usr/lib/lua/luci/view/aria2/overview_status.htm
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/hd_idle.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/samba.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/samba4.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/minidlna.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/transmission.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/mjpg-streamer.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/p910nd.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/usb_printer.lua
-sed -i 's/\"services\"/\"nas\"/g' /usr/lib/lua/luci/controller/xunlei.lua
-sed -i 's/services/nas/g'  /usr/lib/lua/luci/view/minidlna_status.htm
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/hd_idle.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/samba.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/samba4.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/minidlna.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/transmission.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/mjpg-streamer.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/p910nd.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/usb_printer.lua
+sed -i 's/"services"/"nas"/g' /usr/lib/lua/luci/controller/xunlei.lua
+sed -i 's/services/nas/g' /usr/lib/lua/luci/view/minidlna_status.htm
 
-sed -i 's/\"services\"/\"nas\"/g' /usr/share/luci/menu.d/luci-app-samba4.json
+sed -i 's/"services"/"nas"/g' /usr/share/luci/menu.d/luci-app-samba4.json
 
-sed -i 's#downloads.openwrt.org#mirrors.tencent.com/lede#g' /etc/opkg/distfeeds.conf
+# ✅ 自动替换 distfeeds.conf 为北京大学镜像（准确识别版本和架构）
+arch=$(grep DISTRIB_ARCH /etc/openwrt_release | cut -d"'" -f2)
+branch=$(grep DISTRIB_RELEASE /etc/openwrt_release | cut -d"'" -f2)
+mirror_base="http://mirrors.pku.edu.cn/immortalwrt/releases/$branch/packages/$arch"
+
+# 删除原始软件源
+sed -i '/^src\/gz/d' /etc/opkg/distfeeds.conf
+
+# 写入新的源
+cat >> /etc/opkg/distfeeds.conf <<EOF
+src/gz openwrt_base $mirror_base/base
+src/gz openwrt_luci $mirror_base/luci
+src/gz openwrt_packages $mirror_base/packages
+src/gz openwrt_routing $mirror_base/routing
+src/gz openwrt_telephony $mirror_base/telephony
+EOF
+
+# 修改 root 密码为空密码（可选）
 sed -i 's/root::0:0:99999:7:::/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::/g' /etc/shadow
 sed -i 's/root:::0:99999:7:::/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::/g' /etc/shadow
 
-sed -i "s/# //g" /etc/opkg/distfeeds.conf
-sed -i '/helloworld/d' /etc/opkg/distfeeds.conf
-sed -i '/openwrt_luci/ { s/snapshots/releases\/18.06.9/g; }'  /etc/opkg/distfeeds.conf
-
+# 禁用软件包签名校验（选项）
 sed -i '/check_signature/d' /etc/opkg.conf
 
+# 删除端口53重定向（可选）
 sed -i '/REDIRECT --to-ports 53/d' /etc/firewall.user
 
+# 启用无线（移除禁用选项）
 sed -i '/option disabled/d' /etc/config/wireless
 sed -i '/set wireless.radio${devidx}.disabled/d' /lib/wifi/mac80211.sh
 
+# 修改系统显示版本号
 sed -i '/DISTRIB_REVISION/d' /etc/openwrt_release
 echo "DISTRIB_REVISION='R25.5.25'" >> /etc/openwrt_release
 sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
 echo "DISTRIB_DESCRIPTION='LEDE '" >> /etc/openwrt_release
 
+# 禁用 dnsmasq 日志写入
 sed -i '/log-facility/d' /etc/dnsmasq.conf
 echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
 
+# 清理缓存
 rm -rf /tmp/luci-modulecache/
 rm -f /tmp/luci-indexcache
 
