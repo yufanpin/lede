@@ -75,20 +75,22 @@ TARGET_DEVICES += jdcloud_re-cs-02
 define Device/jdcloud_re-cs-07
 	$(call Device/FitImage)
 	$(call Device/EmmcImage)
-	DEVICE_VENDOR := JDCloud 
+	DEVICE_VENDOR := JDCloud
 	DEVICE_MODEL := ER1
 	SOC := ipq6010
 	BLOCKSIZE := 64k
-	KERNEL_SIZE := 6144k  # 使用验证过的6MB填充值
+	KERNEL_SIZE := 6144k
 	DEVICE_DTS_CONFIG := config@cp03-c4
-	DEVICE_PACKAGES := -kmod-ath11k-ahb -ath11k-firmware-ipq6018 
- 
-    	# 仅保留factory和sysupgrade（删除recovery）
-    	IMAGES := factory.bin  sysupgrade.bin 
-    	# 使用与Lienol相同的有效生成规则（但保持LEDE的$$$$语法）
-    	IMAGE/factory.bin  := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs | append-metadata
-endef 
+	DEVICE_PACKAGES := -kmod-ath11k-ahb -ath11k-firmware-ipq6018
+	IMAGES := factory.bin sysupgrade.bin
+	IMAGE/factory.bin := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs | append-metadata
+endef
 TARGET_DEVICES += jdcloud_re-cs-07
+
+
+
+
+
 
 
 
