@@ -73,20 +73,20 @@ TARGET_DEVICES += jdcloud_re-cs-02
 
 #测试用的re-cs-07，factory测试是否能正常输入
 define Device/jdcloud_re-cs-07
-  $(call Device/FitImage)
-  $(call Device/EmmcImage)
-  DEVICE_VENDOR := JDCloud 
-  DEVICE_MODEL := ER1
-  SOC := ipq6010
-  BLOCKSIZE := 64k
-  KERNEL_SIZE := 6144k  # 使用验证过的6MB填充值
-  DEVICE_DTS_CONFIG := config@cp03-c4
-  DEVICE_PACKAGES := -kmod-ath11k-ahb -ath11k-firmware-ipq6018 
+	$(call Device/FitImage)
+	$(call Device/EmmcImage)
+	DEVICE_VENDOR := JDCloud 
+	DEVICE_MODEL := ER1
+	SOC := ipq6010
+	BLOCKSIZE := 64k
+	KERNEL_SIZE := 6144k  # 使用验证过的6MB填充值
+	DEVICE_DTS_CONFIG := config@cp03-c4
+	DEVICE_PACKAGES := -kmod-ath11k-ahb -ath11k-firmware-ipq6018 
  
-  # 仅保留factory和sysupgrade（删除recovery）
-  IMAGES := factory.bin  sysupgrade.bin 
-  # 使用与Lienol相同的有效生成规则（但保持LEDE的$$$$语法）
-  IMAGE/factory.bin  := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs | append-metadata
+    	# 仅保留factory和sysupgrade（删除recovery）
+    	IMAGES := factory.bin  sysupgrade.bin 
+    	# 使用与Lienol相同的有效生成规则（但保持LEDE的$$$$语法）
+    	IMAGE/factory.bin  := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs | append-metadata
 endef 
 TARGET_DEVICES += jdcloud_re-cs-07
 
